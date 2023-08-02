@@ -1,1 +1,1 @@
-# stockMarketRiskManagement111111
+# stockMarketRiskManagement
