@@ -16,18 +16,12 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
-from django.views.decorators.csrf import csrf_protect
-
-
-import yfinance as yf
 import requests
 import json
 import fmpsdk
 from values.keys import Keys
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-import statsmodels.api as sm
 import sys
 import traceback
 
@@ -38,9 +32,9 @@ twelveDataKey = accesKeys.get_twelveDataKey()
 
 def getGrowthRate(rate):
     if(rate < 0):
-        rate = rate*2
+        rate = rate * 2
     else:
-        rate = rate/2
+        rate = rate / 2
     return rate
 
 
@@ -69,7 +63,6 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
     
-        # Redirect to a desired page
         return redirect('activationSuccess') 
         response = {
                 "success": True,
@@ -93,13 +86,9 @@ def activationFail(request):
 def activateEmail(request, user, email):
     try:
         token = default_token_generator.make_token(user)
-        print(token)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        print(uid)
         current_site = get_current_site(request)
-        print(current_site)
         domain = current_site.domain
-        print(domain)
         subject = 'Activate your account'
         message = render_to_string("api/activation_email.html", {
             'user': user,
@@ -108,7 +97,6 @@ def activateEmail(request, user, email):
             'token' : token,
             "protocol" : 'https' if request.is_secure() else 'http'
         })
-        print(message)
         email = EmailMessage(subject,message, to=[email])
         email.send()
     except Exception as e:
@@ -121,7 +109,6 @@ def register(request):
     username = request.POST['username']
     password = request.POST['password']
     email = request.POST['email']
-    print(email)
     try:
         user = User.objects.create_user(
             username=username,password=password,email=email,is_active=False)
@@ -248,12 +235,10 @@ def getFreeCashFlow(request):
             }
             return HttpResponse(json.dumps(response))
     
-    print(companyTicker)
 
     waccUrl = 'https://financialmodelingprep.com/api/v4/advanced_discounted_cash_flow?symbol={companyTicker}&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
     getWacc = requests.get(waccUrl.format(companyTicker=companyTicker.upper()))
     waccData = json.loads(getWacc.text)
-    print(waccData[0]['wacc'])
 
     required_rate = waccData[0]['wacc']/100
     perpetual_rate = 0.03
@@ -266,11 +251,9 @@ def getFreeCashFlow(request):
         list.append(data[i]['freeCashFlow'])
 
     list.reverse()
-    print(list)
 
     cashFlowValue = max(list[-1],list[-2],list[-3])
     terminalValue = cashFlowValue * (1+perpetual_rate)/(required_rate-perpetual_rate)
-    print(terminalValue)
 
     futureCashFlows = []
     discountFactor = []
@@ -319,8 +302,6 @@ def getStockNews(request):
         returnList = []
         
         for i in range (0,len(data)):
-            print(data[i])
-            print('')
             if(data[i]['site'] in sources):
                 returnList.append(data[i])
                 counter +=1
@@ -506,11 +487,9 @@ def getStockNumberOfShares(request):
         params = {'ticker': companyTicker}
         sharesOut = requests.get(sharesOutUrl.format(ticker=params['ticker']))
         sharesOutData = json.loads(sharesOut.text )
-        print(sharesOutData)
         percentage = sharesOutData[0]['numberOfShares']/sharesOutData[4]['numberOfShares'] * 100
         percentage = 100 - percentage
         percentage = round(percentage,2)
-        print(percentage)
         response = {
             'success' : True,
             'data' :[
@@ -583,27 +562,17 @@ def getValueAtRiskAndVolatilty(request):
         sp500.reverse()
         sp500ChangeOverTime = [item['close'] for item in sp500]
         sp500Df = pd.DataFrame(sp500ChangeOverTime,columns = ['Adj Close'])
-        # market_returns = sp500Df['Adj Close'].pct_change()
         np.set_printoptions(threshold=sys.maxsize)
-        # print(sp500Df)
         s['returns'] = s['returns'].dropna()
         market_returns = sp500Df['Adj Close'].pct_change()
         market_returns = market_returns.dropna()
 
         nan_mask = np.isnan(s['returns'].dropna())
-        nan_indices = np.where(nan_mask)[0]
 
         s['returns'] = s['returns'].replace([np.inf, -np.inf], np.nan).dropna()
         market_returns = market_returns.replace([np.inf, -np.inf], np.nan).dropna()
         s, market_returns = s.align(market_returns, join='inner',axis=0)
-        # print(len(s['returns']))
-        # print(len(market_returns))
-
-        # if np.any(nan_mask):
-        #     print("NaN values found at indices:", nan_indices)
-        # else:
-        #     print("No NaN values found")
-
+       
         covariance = np.cov(s['returns'], market_returns, ddof=0)[0, 1]
         market_variance = np.var(market_returns, ddof=0)
         beta = covariance / market_variance
@@ -626,15 +595,11 @@ def getValueAtRiskAndVolatilty(request):
             'firstDay' : firstDay,
             'beta'  : round(beta,2),
         }
-        print(json.dumps(response))
     except Exception as e:
         response = {'success' : False}
         print(e)
     
     return HttpResponse(json.dumps(response))
-
-
-
 
 @require_http_methods(['GET'])
 def getCompanyInsiderTrading(request):
@@ -723,7 +688,6 @@ def getStockPeers(request):
 
         mainStockProfile = requests.get(companyProfileUrl.format(profileTicker=params['ticker']))
         mainStockProfileData = json.loads(mainStockProfile.text)
-        print(mainStockProfileData[0]['companyName'])
         mainCompanyList = []
 
         companies=[]
@@ -733,7 +697,6 @@ def getStockPeers(request):
             companyProfileData = json.loads(companyProfile.text)
             if companyProfileData[0]['companyName']:
                 if companyProfileData[0]['mktCap'] > 0 and (mainStockProfileData[0]['mktCap'] / companyProfileData[0]['mktCap'] and companyProfileData[0]['companyName'] != mainStockProfileData[0]['companyName']) < 10000 :
-                    print(companyProfileData[0]['mktCap'] , companyProfileData[0]['companyName'] , mainStockProfileData[0]['mktCap'] / companyProfileData[0]['mktCap'] )
                     info = {
                         'name' : companyProfileData[0]['companyName'],
                         'ticker' : i,
@@ -802,11 +765,9 @@ def getCompanyKeyMetrics(request):
 
         incomeStatement = requests.get(incomeStatementUrl.format(profileTicker=params['ticker']))
         incomeStatementData = json.loads(incomeStatement.text)
-        print(incomeStatementData)
 
         ratios = requests.get(ratiosUrl.format(profileTicker=params['ticker']))
         ratiosData = json.loads(ratios.text)
-        print(ratiosData)
 
         response = {
             'success' : True,
