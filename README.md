@@ -7,10 +7,11 @@ Additionally, the app offers access to current news, press releases related to t
 
 User Authentication - Login and Registration Walkthrough
 
-https://github.com/ralphsz288/stockMarketRiskManagement/assets/141254317/86e6ad06-d524-4deb-97ab-cf45541b3d98
+https://github.com/ralphsz288/stockMarketRiskManagement/assets/141254317/e4ba1320-52c8-4a18-a26b-61c4c23637d7
+
 
 
 Feature Showcase and App Walkthrough
 
-https://github.com/ralphsz288/stockMarketRiskManagement/assets/141254317/0de8f2b0-efab-4431-895a-909b555f1c54
+https://github.com/ralphsz288/stockMarketRiskManagement/assets/141254317/0d96ce70-9a53-4e4f-b066-ad73ac33a970
 
