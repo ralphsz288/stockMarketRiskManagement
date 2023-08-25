@@ -19,16 +19,16 @@ from django.contrib.auth import get_user_model
 import requests
 import json
 import fmpsdk
-from values.keys import Keys
+import os
 import numpy as np
 import pandas as pd
 import sys
 import traceback
+from dotenv import load_dotenv
 
-apikey = '31f3d9a1f22b7dcbd0e21ec53bd28874'
-accesKeys = Keys()
-twelveDataKey = accesKeys.get_twelveDataKey()
+load_dotenv()
 
+apikey = os.getenv("API_KEY")
 
 def getGrowthRate(rate):
     if(rate < 0):
@@ -191,10 +191,10 @@ def getFreeCashFlow(request):
     companyTicker = request.GET['companyTicker'];
     growthAverage = request.GET['growthAverage'];
   
-    cashFlowUrl = 'https://financialmodelingprep.com/api/v3/cash-flow-statement/{ticker}?apikey=31f3d9a1f22b7dcbd0e21ec53bd28874&limit=5'
-    enterPriseValuesUrl = 'https://financialmodelingprep.com/api/v3/enterprise-values/{ticker}?limit=1&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
-    cashFlowGrowthUrl = 'https://financialmodelingprep.com/api/v3/cash-flow-statement-growth/{ticker}?limit=5&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
-    companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+    cashFlowUrl = 'https://financialmodelingprep.com/api/v3/cash-flow-statement/{ticker}?apikey={}&limit=5'.format(apikey)
+    enterPriseValuesUrl = 'https://financialmodelingprep.com/api/v3/enterprise-values/{ticker}?limit=1&apikey={}'.format(apikey)
+    cashFlowGrowthUrl = 'https://financialmodelingprep.com/api/v3/cash-flow-statement-growth/{ticker}?limit=5&apikey={}'.format(apikey)
+    companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey={}'.format(apikey)
    
     params = {'ticker': companyTicker}
 
@@ -236,7 +236,7 @@ def getFreeCashFlow(request):
             return HttpResponse(json.dumps(response))
     
 
-    waccUrl = 'https://financialmodelingprep.com/api/v4/advanced_discounted_cash_flow?symbol={companyTicker}&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+    waccUrl = 'https://financialmodelingprep.com/api/v4/advanced_discounted_cash_flow?symbol={companyTicker}&apikey={}'.format(apikey)
     getWacc = requests.get(waccUrl.format(companyTicker=companyTicker.upper()))
     waccData = json.loads(getWacc.text)
 
@@ -294,7 +294,7 @@ def getStockNews(request):
     sources = ['CNBC Television','CNBC','Forbes','Yahoo Finance']
     try:
         companyTicker = request.GET['companyTicker']
-        newsUrl = 'https://financialmodelingprep.com/api/v3/stock_news?tickers={ticker}&limit=500&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        newsUrl = 'https://financialmodelingprep.com/api/v3/stock_news?tickers={ticker}&limit=500&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         news = requests.get(newsUrl.format(ticker=params['ticker']))
         data = json.loads(news.text)
@@ -374,7 +374,7 @@ def getStockNews(request):
 def getStockPressRelease(request):
     try:
         companyTicker = request.GET['companyTicker'] 
-        pressReleaseUrl = 'https://financialmodelingprep.com/api/v3/press-releases/{ticker}?page=0&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        pressReleaseUrl = 'https://financialmodelingprep.com/api/v3/press-releases/{ticker}?page=0&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         pressRelease = requests.get(pressReleaseUrl.format(ticker=params['ticker']))
         pressReleaseData = json.loads(pressRelease.text)
@@ -408,16 +408,16 @@ def getStockPressRelease(request):
 def getAnalystEstimates(request):
     try:
         companyTicker = request.GET['companyTicker'] 
-        analystEstimatesUrl = 'https://financialmodelingprep.com/api/v3/analyst-estimates/{ticker}?limit=1&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        analystEstimatesUrl = 'https://financialmodelingprep.com/api/v3/analyst-estimates/{ticker}?limit=1&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         analystEstimates = requests.get(analystEstimatesUrl.format(ticker=params['ticker']))
         analystEstimatesData = json.loads(analystEstimates.text)
 
-        incomeStatementUrl = 'https://financialmodelingprep.com/api/v3/income-statement/{ticker}?limit=1&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        incomeStatementUrl = 'https://financialmodelingprep.com/api/v3/income-statement/{ticker}?limit=1&apikey={}'.format(apikey)
         incomeStatement = requests.get(incomeStatementUrl.format(ticker=params['ticker']))
         incomeStatementData = json.loads(incomeStatement.text)
 
-        stockGradeUrl = 'https://financialmodelingprep.com/api/v3/grade/{ticker}?limit=5&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        stockGradeUrl = 'https://financialmodelingprep.com/api/v3/grade/{ticker}?limit=5&apikey={}'.format(apikey)
         stockGrade = requests.get(stockGradeUrl.format(ticker=params['ticker']))
         stockGradeData = json.loads(stockGrade.text)
 
@@ -483,7 +483,7 @@ def getAnalystEstimates(request):
 def getStockNumberOfShares(request):
     try:
         companyTicker = request.GET['companyTicker'] 
-        sharesOutUrl = 'https://financialmodelingprep.com/api/v3/enterprise-values/{ticker}?limit=5&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        sharesOutUrl = 'https://financialmodelingprep.com/api/v3/enterprise-values/{ticker}?limit=5&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         sharesOut = requests.get(sharesOutUrl.format(ticker=params['ticker']))
         sharesOutData = json.loads(sharesOut.text )
@@ -512,7 +512,7 @@ def getValueAtRiskAndVolatilty(request):
     alpha = 0.95
     try:
         companyTicker = request.GET['companyTicker'] 
-        changeOverTimeUrl = 'https://financialmodelingprep.com/api/v3/historical-price-full/{ticker}?from=2007-03-12&to=today&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        changeOverTimeUrl = 'https://financialmodelingprep.com/api/v3/historical-price-full/{ticker}?from=2007-03-12&to=today&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         changeOverTime = requests.get(changeOverTimeUrl.format(ticker=params['ticker']))
         changeOverTimeData = json.loads(changeOverTime.text)
@@ -554,7 +554,7 @@ def getValueAtRiskAndVolatilty(request):
         var2 = np.quantile(changeOverTime,1-alpha)*100
 
 
-        sp500ChangeOverTimeUrl = 'https://financialmodelingprep.com/api/v3/historical-price-full/^GSPC?from=2007-03-12&to=today&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        sp500ChangeOverTimeUrl = 'https://financialmodelingprep.com/api/v3/historical-price-full/^GSPC?from=2007-03-12&to=today&apikey={}'.format(apikey)
         sp500ChangeOverTime = requests.get(sp500ChangeOverTimeUrl)
         sp500Data = json.loads(sp500ChangeOverTime.text)
         sp500Items = list(sp500Data.items())
@@ -605,7 +605,7 @@ def getValueAtRiskAndVolatilty(request):
 def getCompanyInsiderTrading(request):
     try:
         companyTicker = request.GET['companyTicker'] 
-        insiderTradingUrl = 'https://financialmodelingprep.com/api/v4/insider-trading?symbol={ticker}&page=0&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        insiderTradingUrl = 'https://financialmodelingprep.com/api/v4/insider-trading?symbol={ticker}&page=0&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         insiderTrading = requests.get(insiderTradingUrl.format(ticker=params['ticker']))
         insiderTradingData = json.loads(insiderTrading.text )
@@ -680,8 +680,8 @@ def getCompanyInsiderTrading(request):
 def getStockPeers(request):
     try:
         companyTicker = request.GET['companyTicker']
-        companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{profileTicker}?apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
-        stockPeersUrl = 'https://financialmodelingprep.com/api/v4/stock_peers?symbol={ticker}&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{profileTicker}?apikey={}'.format(apikey)
+        stockPeersUrl = 'https://financialmodelingprep.com/api/v4/stock_peers?symbol={ticker}&apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         stockPeers = requests.get(stockPeersUrl.format(ticker=params['ticker']))
         stockPeersData = json.loads(stockPeers.text)
@@ -731,7 +731,7 @@ def getStockPeers(request):
 def getCompanyNameUsingTicker(request):
     try:
         companyTicker = request.GET['companyTicker']
-        companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{profileTicker}?apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        companyProfileUrl = 'https://financialmodelingprep.com/api/v3/profile/{profileTicker}?apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
         mainStockProfile = requests.get(companyProfileUrl.format(profileTicker=params['ticker']))
         mainStockProfileData = json.loads(mainStockProfile.text)
@@ -755,9 +755,9 @@ def getCompanyNameUsingTicker(request):
 def getCompanyKeyMetrics(request):
     try:
         companyTicker = request.GET['companyTicker']
-        balanceSheetUrl = 'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{profileTicker}?limit=1&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
-        incomeStatementUrl = 'https://financialmodelingprep.com/api/v3/income-statement/{profileTicker}?limit=1&apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
-        ratiosUrl = 'https://financialmodelingprep.com/api/v3/ratios-ttm/{profileTicker}?apikey=31f3d9a1f22b7dcbd0e21ec53bd28874'
+        balanceSheetUrl = 'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{profileTicker}?limit=1&apikey={}'.format(apikey)
+        incomeStatementUrl = 'https://financialmodelingprep.com/api/v3/income-statement/{profileTicker}?limit=1&apikey={}'.format(apikey)
+        ratiosUrl = 'https://financialmodelingprep.com/api/v3/ratios-ttm/{profileTicker}?apikey={}'.format(apikey)
         params = {'ticker': companyTicker}
 
         balanceSheet = requests.get(balanceSheetUrl.format(profileTicker=params['ticker']))
